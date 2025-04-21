@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruleta de Equipos</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    #wheel {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      border: 10px solid #444;
+      margin: 30px auto;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    .slice {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background: transparent;
+      transform-origin: 100% 100%;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+    }
+    #arrow {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid red;
+      margin: 0 auto;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      margin-top: 30px;
+      cursor: pointer;
+    }
+    .team {
+      margin-top: 30px;
+    }
+    .team h2 {
+      margin-bottom: 10px;
+    }
+    .name {
+      font-size: 20px;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ruleta para formar equipos</h1>
+  <div id="arrow"></div>
+  <div id="wheel"></div>
+  <button onclick="spin()">Girar ruleta</button>
+  <h2 id="selected"></h2>
+
+  <div class="team">
+    <h2>Equipo 1</h2>
+    <div id="equipo1"></div>
+  </div>
+
+  <div class="team">
+    <h2>Equipo 2</h2>
+    <div id="equipo2"></div>
+  </div>
+
+  <script>
+    let nombres = [
+      "Piña", "Choncha", "Copo", "Gustavo", "Nachan", 
+      "Emer", "John", "Moneda", "Barbie", "Hermano de Karen", "Eduardo"
+    ];
+
+    let equipo1 = [], equipo2 = [], turno = 1;
+    const wheel = document.getElementById('wheel');
+
+    function renderWheel() {
+      wheel.innerHTML = '';
+      const total = nombres.length;
+      const angle = 360 / total;
+
+      nombres.forEach((nombre, i) => {
+        const slice = document.createElement('div');
+        slice.className = 'slice';
+        slice.style.background = `hsl(${i * angle}, 70%, 50%)`;
+        slice.style.transform = `rotate(${i * angle}deg) skewY(${90 - angle}deg)`;
+        slice.innerHTML = `<div style="transform: skewY(${-(90 - angle)}deg) rotate(${angle / 2}deg); width: 100px;">${nombre}</div>`;
+        wheel.appendChild(slice);
+      });
+    }
+
+    function spin() {
+      if (nombres.length === 0) {
+        document.getElementById('selected').innerText = "Todos los integrantes han sido asignados.";
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * nombres.length);
+      const selected = nombres[randomIndex];
+      const degreesPerName = 360 / nombres.length;
+      const rotateTo = 360 * 5 + (360 - randomIndex * degreesPerName - degreesPerName / 2);
+
+      wheel.style.transition = 'transform 4s ease-out';
+      wheel.style.transform = `rotate(${rotateTo}deg)`;
+
+      setTimeout(() => {
+        document.getElementById('selected').innerText = `Seleccionado: ${selected}`;
+
+        if (turno % 2 === 1) {
+          equipo1.push(selected);
+          document.getElementById('equipo1').innerHTML = equipo1.map(n => `<div class="name">${n}</div>`).join('');
+        } else {
+          equipo2.push(selected);
+          document.getElementById('equipo2').innerHTML = equipo2.map(n => `<div class="name">${n}</div>`).join('');
+        }
+
+        nombres.splice(randomIndex, 1);
+        turno++;
+        renderWheel();
+        wheel.style.transition = 'none'; // reset for next spin
+      }, 4200);
+    }
+
+    renderWheel();
+  </script>
+
+</body>
+</html>
